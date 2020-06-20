@@ -29,9 +29,12 @@ secret <- "73568369dc3d4c57958979c83a9815ad"
 Sys.setenv(SPOTIFY_CLIENT_ID = id)
 Sys.setenv(SPOTIFY_CLIENT_SECRET = secret)
 access_token <- get_spotify_access_token()
-
 my_id <- "crwmusic"
-my_plists_offset_0 <- get_user_playlists(my_id, limit = 50)
+
+# API calls ---------------------------------------------------------------
+
+# make more efficient
+my_plists_offset_0get_featured_playlists <- get_user_playlists(my_id, limit = 50)
 my_plists_offset_1 <- get_user_playlists(my_id, limit = 50, offset = 50)
 my_plists_offset_2 <- get_user_playlists(my_id, limit = 50, offset = 100)
 my_plists_offset_3 <- get_user_playlists(my_id, limit = 50, offset = 150)
@@ -45,11 +48,22 @@ my_plists <-
     my_plists_offset_4
   )
 
+rm(my_plists_offset_0)
+rm(my_plists_offset_1)
+rm(my_plists_offset_2)
+rm(my_plists_offset_3)
+rm(my_plists_offset_4)
 
 my_plists_songs <- my_plists %>%
-  filter(name %in% c("q2-20"))
+  filter(name %in% c("q2-20", "Thumbs Up 2019", "Thumbs Up 2020"))
 
-tracks <- get_playlist_tracks(my_plists_songs)
+# Make this math a function
+# x <- get_playlist(my_plists$id[1])
+# x$track$total
+# x$track$total / 50
+# x$track$total %% 50 + (floor(x$track$total/50) * 50)
+
+tracks <- get_playlist_tracks(my_plists_songs$id[1])
 features <- get_track_audio_features(tracks)
 
 
@@ -64,14 +78,20 @@ recently_played <- get_my_recently_played(limit = 20) %>%
 
 my_top_artists <- get_my_top_artists_or_tracks(type = 'artists',
                              time_range = 'short_term',
-                             limit = 50) %>%
+                             limit = 50,
+                             offset = 0) %>%
   select(name, genres) %>%
   rowwise %>%
   mutate(genres = paste(genres, collapse = ', ')) %>%
   ungroup
   # %>% kable()
 
-my_top_tracks <- get_my_top_artists_or_tracks(type = 'tracks', time_range = 'short_term', limit = 5) %>% 
-  mutate(artist.name = map_chr(artists, function(x) x$name[1])) %>% 
+my_top_tracks <-
+  get_my_top_artists_or_tracks(type = 'tracks',
+                               time_range = 'short_term',
+                               limit = 50,
+                               offset = 0) %>%
+  mutate(artist.name = map_chr(artists, function(x)
+    x$name[1])) %>%
   select(name, artist.name, album.name)
-  # %>% kable()
+# %>% kable()
