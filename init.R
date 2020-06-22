@@ -44,6 +44,8 @@ if (count(my_plists) == limit) {
       my_plists %>% rbind(get_my_playlists(limit = limit, offset = offset_clock))
   }
 }
+my_plists[,!(names(my_plists) %in% "images")] %>% write.csv(file = paste(deparse(substitute(my_plists)), ".csv", sep = ""))
+write.csv()
 
 ## potentially add dataframe of followed playlists
 my_plists %>%
