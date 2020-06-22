@@ -44,6 +44,7 @@ if (count(my_plists) == limit) {
       my_plists %>% rbind(get_my_playlists(limit = limit, offset = offset_clock))
   }
 }
+sapply(my_plists,class)
 my_plists[,!(names(my_plists) %in% "images")] %>% write.csv(file = paste(deparse(substitute(my_plists)), ".csv", sep = ""))
 write.csv()
 
