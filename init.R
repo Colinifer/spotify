@@ -33,68 +33,104 @@ my_id <- "crwmusic"
 
 # API calls ---------------------------------------------------------------
 
-my_plists <- function() {
-  limit <- 50
-  get_my_playlists(limit = limit)
-  lapply(list, function)
-}
-
+# Get all playlists
+limit <- 50
+my_plists <- get_my_playlists(limit = limit)
 offset_clock <- 0
-while (offset_clock < 50) {
-  get_user_playlists(my_id, limit = max_limit, offset = offset_clock)
+if (count(my_plists) == limit) {
+  while (count(my_plists) %% limit == 0) {
+    offset_clock <- offset_clock + limit
+    my_plists <-
+      my_plists %>% rbind(get_my_playlists(limit = limit, offset = offset_clock))
+  }
 }
 
-  my_plists <- get_user_playlists(my_id, limit = max_limit, offset = offset_clock) %>% count()
-  
-  if (count(my_plists) == 50) {
-    offset_clock <- offset_clock + max
-  }
-
-
- %>% t <- get_user_playlists(my_id, limit = 50)
-
-if (length(my_plists_offset) < 50) {
-  print("50!")
-} else  (length(my_plists_offset))
-
-# make more efficient
- my_plists_offset_0 <- get_user_playlists(my_id, limit = 50)
- my_plists_offset_1 <-
-   get_user_playlists(my_id, limit = 50, offset = 50)
- my_plists_offset_2 <-
-   get_user_playlists(my_id, limit = 50, offset = 100)
- my_plists_offset_3 <-
-   get_user_playlists(my_id, limit = 50, offset = 150)
- my_plists_offset_4 <-
-   get_user_playlists(my_id, limit = 50, offset = 200)
- my_plists_offset_4 <-
-   get_user_playlists(my_id, limit = 50, offset = 250)
- my_plists <-
-  rbind(
-    my_plists_offset_0,
-    my_plists_offset_1,
-    my_plists_offset_2,
-    my_plists_offset_3,
-    my_plists_offset_4
-  )
-
-rm(my_plists_offset_0)
-rm(my_plists_offset_1)
-rm(my_plists_offset_2)
-rm(my_plists_offset_3)
-rm(my_plists_offset_4)
-
-my_plists_songs <- my_plists %>%
+## potentially add dataframe of followed playlists
+my_plists %>%
+  filter(owner.id == my_id) %>% 
   filter(name %in% c("q2-20", "Thumbs Up 2019", "Thumbs Up 2020"))
 
-# Make this math a function
-# x <- get_playlist(my_plists$id[1])
-# x$track$total
-# x$track$total / 50
-# x$track$total %% 50 + (floor(x$track$total/50) * 50)
+# API calls - test code ---------------------------------------------------------------
 
-tracks <- get_playlist_tracks(my_plists_songs$id[1])
-features <- get_track_audio_features(tracks)
+# if (count(my_plists) == 50) {
+#   offset_clock <- offset_clock + max
+# }
+# while(count(my_plists) < 50)
+# 
+# 
+# offset_clock <- 0
+# while (offset_clock < 50) {
+#   get_user_playlists(my_id, limit = max_limit, offset = offset_clock)
+# }
+# 
+#   my_plists <- get_user_playlists(my_id, limit = max_limit, offset = offset_clock) %>% count()
+#   
+#   if (count(my_plists) == 50) {
+#     offset_clock <- offset_clock + max
+#   }
+# 
+# 
+#  %>% t <- get_user_playlists(my_id, limit = 50)
+# 
+# if (length(my_plists_offset) < 50) {
+#   print("50!")
+# } else  (length(my_plists_offset))
+# 
+# # make more efficient
+#  my_plists_offset_0 <- get_user_playlists(my_id, limit = 50)
+#  my_plists_offset_1 <-
+#    get_user_playlists(my_id, limit = 50, offset = 50)
+#  my_plists_offset_2 <-
+#    get_user_playlists(my_id, limit = 50, offset = 100)
+#  my_plists_offset_3 <-
+#    get_user_playlists(my_id, limit = 50, offset = 150)
+#  my_plists_offset_4 <-
+#    get_user_playlists(my_id, limit = 50, offset = 200)
+#  my_plists_offset_4 <-
+#    get_user_playlists(my_id, limit = 50, offset = 250)
+#  my_plists <-
+#   rbind(
+#     my_plists_offset_0,
+#     my_plists_offset_1,
+#     my_plists_offset_2,
+#     my_plists_offset_3,
+#     my_plists_offset_4
+#   )
+# 
+# rm(my_plists_offset_0)
+# rm(my_plists_offset_1)
+# rm(my_plists_offset_2)
+# rm(my_plists_offset_3)
+# rm(my_plists_offset_4)
+# 
+# my_plists_songs <- my_plists %>%
+#   filter(name %in% c("q2-20", "Thumbs Up 2019", "Thumbs Up 2020"))
+# 
+# # Make this math a function
+# # x <- get_playlist(my_plists$id[1])
+# # x$track$total
+# # x$track$total / 50
+# # x$track$total %% 50 + (floor(x$track$total/50) * 50)
+
+
+# Get tracks from playlists -----------------------------------------------
+
+limit <- 100
+tracks <- get_playlist_tracks(my_plists$id[1], limit = limit)
+offset_clock <- 0
+if (count(tracks) == limit) {
+  while (count(tracks) %% limit == 0) {
+    offset_clock <- offset_clock + limit
+    tracks <-
+      tracks %>% rbind(get_playlist_tracks(my_plists$id[1], limit = limit, offset = offset_clock))
+  }
+}
+
+tracks <- get_playlist_tracks(my_plists$id[1], limit = limit)
+
+# Get track features ------------------------------------------------------
+
+features <- get_track_audio_features(head(tracks$track.id, 100))
 
 
 recently_played <- get_my_recently_played(limit = 20) %>%
