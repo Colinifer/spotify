@@ -44,9 +44,9 @@ if (count(my_plists) == limit) {
       my_plists %>% rbind(get_my_playlists(limit = limit, offset = offset_clock))
   }
 }
-sapply(my_plists,class)
-my_plists[,!(names(my_plists) %in% "images")] %>% write.csv(file = paste(deparse(substitute(my_plists)), ".csv", sep = ""))
-write.csv()
+data_structure <- str(my_plists)
+sapply(my_plists, class)
+my_plists[, !(names(my_plists) %in% "images")] %>% write.csv(file = paste(deparse(substitute(my_plists)), ".csv", sep = ""))
 
 ## potentially add dataframe of followed playlists
 my_plists %>%
@@ -128,8 +128,24 @@ if (count(tracks) == limit) {
       tracks %>% rbind(get_playlist_tracks(my_plists$id[1], limit = limit, offset = offset_clock))
   }
 }
+# remove list rows
+tracks[, !(names(tracks) %in% "images")] %>% write.csv(file = paste(deparse(substitute(my_plists)), ".csv", sep = ""))
 
-tracks <- get_playlist_tracks(my_plists$id[1], limit = limit)
+plist_tracks <- my_plists %>%
+  filter(owner.id == my_id) %>%
+  filter(name %in% c("q2-20"))
+
+limit <- 100
+tracks <- get_playlist_tracks(plist_tracks$id, limit = limit)
+offset_clock <- 0
+# running into list issue
+if (count(tracks) == limit) {
+  while (count(tracks) %% limit == 0) {
+    offset_clock <- offset_clock + limit
+    tracks <-
+      tracks %>% rbind(get_playlist_tracks(plist_tracks$id, limit = limit, offset = offset_clock))
+  }
+}
 
 # Get track features ------------------------------------------------------
 
