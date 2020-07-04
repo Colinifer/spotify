@@ -4,6 +4,8 @@
 pkgs <-
   c(
     "tidyverse",
+    "devtools",
+    "fs",
     "ggplot2",
     "ggfortify",
     "gganimate",
