@@ -14,7 +14,8 @@ pkgs <-
     "lubridate",
     "genius",
     "httpuv",
-    "spotifyr"
+    "spotifyr",
+    "reactable"
   )
 installed_packages <- pkgs %in%
   rownames(installed.packages())
@@ -52,8 +53,8 @@ my_plists[, !(names(my_plists) %in% "images")] %>% write.csv(file = paste(depars
 
 ## potentially add dataframe of followed playlists
 my_plists %>%
-  filter(owner.id == my_id) %>% 
-  filter(name %in% c("q2-20", "Thumbs Up 2019", "Thumbs Up 2020"))
+  filter(owner.id == my_id,
+         name %in% c("Thumbs Up 2020"))
 
 # API calls - test code ---------------------------------------------------------------
 
