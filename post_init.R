@@ -1,25 +1,3 @@
-# API calls ---------------------------------------------------------------
-
-# Get all playlists
-limit <- 50
-my_plists <- get_my_playlists(limit = limit)
-offset_clock <- 0
-if (count(my_plists) == limit) {
-  while (count(my_plists) %% limit == 0) {
-    offset_clock <- offset_clock + limit
-    my_plists <-
-      my_plists %>% rbind(get_my_playlists(limit = limit, offset = offset_clock))
-  }
-}
-data_structure <- str(my_plists)
-sapply(my_plists, class)
-my_plists[, !(names(my_plists) %in% "images")] %>% write.csv(file = paste(deparse(substitute(my_plists)), ".csv", sep = ""))
-
-## potentially add dataframe of followed playlists
-my_plists %>%
-  filter(owner.id == my_id,
-         name %in% c("Thumbs Up 2020"))
-
 # API calls - test code ---------------------------------------------------------------
 
 # if (count(my_plists) == 50) {
@@ -83,11 +61,44 @@ my_plists %>%
 # # x$track$total %% 50 + (floor(x$track$total/50) * 50)
 
 
+# API calls ---------------------------------------------------------------
+
+
+# Get all playlists -------------------------------------------------------
+limit <- 50
+all_plists <- get_my_playlists(limit = limit)
+offset_clock <- 0
+if (count(all_plists) == limit) {
+  while (count(all_plists) %% limit == 0) {
+    offset_clock <- offset_clock + limit
+    all_plists <-
+      all_plists %>% rbind(get_my_playlists(limit = limit, offset = offset_clock))
+  }
+}
+data_structure <- str(my_plists)
+sapply(my_plists, class)
+# Write CSV
+all_plists[, !(names(my_plists) %in% "images")] %>% write.csv(file = paste(deparse(substitute(my_plists)), ".csv", sep = ""))
+
+## potentially add dataframe of followed playlists
+my_plists <- all_plists %>%
+  filter(owner.id == my_id)
+
+query_plist <- my_plists %>% 
+  filter(name %in% c("Thumbs Up 2020"))
+
+
 # Get tracks from playlists -----------------------------------------------
 
+# Bug:
+# currently this code only gets first playlist tracks
+# need to find a way to cycle through playlists
 limit <- 100
 tracks <- get_playlist_tracks(my_plists$id[1], limit = limit)
 offset_clock <- 0
+
+for (length(my_plists$id) in my_plists$id) {}
+
 if (count(tracks) == limit) {
   while (count(tracks) %% limit == 0) {
     offset_clock <- offset_clock + limit
@@ -96,7 +107,7 @@ if (count(tracks) == limit) {
   }
 }
 # remove list rows
-tracks[, !(names(tracks) %in% "images")] %>% write.csv(file = paste(deparse(substitute(my_plists)), ".csv", sep = ""))
+all_tracks <- as.data.frame(tracks[, !(names(tracks) %in% "images")]) %>% write.csv(file = paste(deparse(substitute(my_plists)), ".csv", sep = ""))
 
 plist_tracks <- my_plists %>%
   filter(owner.id == my_id) %>%
