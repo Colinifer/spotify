@@ -93,11 +93,27 @@ query_plist <- my_plists %>%
 # Bug:
 # currently this code only gets first playlist tracks
 # need to find a way to cycle through playlists
+
+x <- my_plists$id[4]
+for (x in my_plists$id) {
+  plist_length <- my_plists %>% filter(id == x) %>% select(tracks.total)
+  limit <- 100
+  clock_length <- round(plist_length / limit, digits = 1) %>% ceiling() * limit
+  offset_clock <- 0
+  
+  
+  if (count(all_tracks) == limit) {
+    while (count(all_tracks) %% limit == 0) {
+      offset_clock <- offset_clock + limit
+      all_tracks <-
+        all_tracks %>% rbind(get_playlist_tracks(x, limit = limit, offset = offset_clock))
+    }
+  }
+}
+
 limit <- 100
 tracks <- get_playlist_tracks(my_plists$id[1], limit = limit)
 offset_clock <- 0
-
-for (length(my_plists$id) in my_plists$id) {}
 
 if (count(tracks) == limit) {
   while (count(tracks) %% limit == 0) {
