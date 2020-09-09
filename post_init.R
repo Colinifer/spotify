@@ -82,7 +82,10 @@ all_plists[, !(names(my_plists) %in% "images")] %>% write.csv(file = paste(depar
 
 ## potentially add dataframe of followed playlists
 my_plists <- all_plists %>%
-  filter(owner.id == my_id)
+  filter(owner.id == my_id) %>% 
+  filter(tracks.total > 0) %>% 
+  filter(name != "Thumbs Up 2018 [Local]") %>% 
+  filter(name != "Classics")
 
 query_plist <- my_plists %>% 
   filter(name %in% c("Thumbs Up 2020"))
@@ -90,38 +93,35 @@ query_plist <- my_plists %>%
 
 # Get tracks from playlists -----------------------------------------------
 
-# Bug:
-# currently this code only gets first playlist tracks
-# need to find a way to cycle through playlists
+# x <- my_plists$id[2]
 
-x <- my_plists$id[4]
-for (x in my_plists$id) {
+plist_tracks <- data.frame()
+all_plist_id <- my_plists$id
+fx.all_playlist_tracks <- function(x) {
   plist_length <- my_plists %>% filter(id == x) %>% select(tracks.total)
   limit <- 100
-  clock_length <- round(plist_length / limit, digits = 1) %>% ceiling() * limit
-  offset_clock <- 0
-  
-  
-  if (count(all_tracks) == limit) {
-    while (count(all_tracks) %% limit == 0) {
-      offset_clock <- offset_clock + limit
-      all_tracks <-
-        all_tracks %>% rbind(get_playlist_tracks(x, limit = limit, offset = offset_clock))
-    }
+  clock_length <- as.integer(round(plist_length / limit))
+  x_tracks <- data.frame()
+  for (i in 0:clock_length) {
+    x_tracks <-
+      x_tracks %>% rbind(get_playlist_tracks(x, limit = limit, offset = (i * limit)))
   }
+  x_tracks <- x_tracks %>% 
+    mutate(
+      playlist.id = my_plists %>% filter(id == x) %>% select(id),
+      playlist.name = my_plists %>% filter(id == x) %>% select(name),
+      playlist.href = my_plists %>% filter(id == x) %>% select(href)
+    )
+  plist_tracks <- plist_tracks %>% rbind(x_tracks)
+  # rm(plist_length, limit, clock_length, offset_clock, x_tracks, plist_tracks)
 }
+plist_tracks <- all_plist_id %>% 
+  lapply(fx.all_playlist_tracks)
+plist_tracks_merged <- do.call("rbind", plist_tracks)
+saveRDS(plist_tracks_merged, "data/library.rds")
 
-limit <- 100
-tracks <- get_playlist_tracks(my_plists$id[1], limit = limit)
-offset_clock <- 0
 
-if (count(tracks) == limit) {
-  while (count(tracks) %% limit == 0) {
-    offset_clock <- offset_clock + limit
-    tracks <-
-      tracks %>% rbind(get_playlist_tracks(my_plists$id[1], limit = limit, offset = offset_clock))
-  }
-}
+
 # remove list rows
 all_tracks <- as.data.frame(tracks[, !(names(tracks) %in% "images")]) %>% write.csv(file = paste(deparse(substitute(my_plists)), ".csv", sep = ""))
 
@@ -129,17 +129,7 @@ plist_tracks <- my_plists %>%
   filter(owner.id == my_id) %>%
   filter(name %in% c("q2-20"))
 
-limit <- 100
-tracks <- get_playlist_tracks(plist_tracks$id, limit = limit)
-offset_clock <- 0
-# running into list issue
-if (count(tracks) == limit) {
-  while (count(tracks) %% limit == 0) {
-    offset_clock <- offset_clock + limit
-    tracks <-
-      tracks %>% rbind(get_playlist_tracks(plist_tracks$id, limit = limit, offset = offset_clock))
-  }
-}
+
 
 # Get track features ------------------------------------------------------
 
