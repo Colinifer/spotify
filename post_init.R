@@ -136,6 +136,32 @@ plist_tracks <- my_plists %>%
 features <- get_track_audio_features(head(tracks$track.id, 100))
 
 
+tracks_audio <- data.frame()
+all_plist_id <- my_plists$id
+fx.all_tracks_audio_analysis <- function(playlist_id) {
+  plist_length <- plist_tracks_merged %>% filter(playlist.id == playlist_id) %>% select(track.id) %>% nrow()
+  all_tracks_id <- plist_tracks_merged %>% 
+    filter(playlist.id == playlist_id) %>% 
+    select(track.id)
+  limit <- 100
+  clock_length <- as.integer(round(plist_length / limit))
+  x_tracks <- data.frame()
+  for (i in 0:clock_length) {
+    x_tracks <-
+      x_tracks %>% rbind(get_track_audio_features(x, limit = limit, offset = (i * limit)))
+  }
+  tracks_audio <- tracks_audio %>% rbind(x_tracks)
+  # rm(plist_length, limit, clock_length, offset_clock, x_tracks, plist_tracks)
+}
+
+tracks_audio <- all_tracks_id %>% 
+  lapply(fx.all_tracks_audio_analysis)
+
+plist_tracks_merged <- do.call("rbind", plist_tracks)
+
+saveRDS(plist_tracks_merged, "data/library.rds")
+
+
 recently_played <- get_my_recently_played(limit = 20) %>%
   mutate(
     artist.name = map_chr(track.artists, function(x)
