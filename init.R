@@ -29,9 +29,3 @@ fx.setdir(proj_name)
 
 # Spotify API setup ---------------------------------------------------------
 
-id <- "026c4ec12a1347e385c2c19abf4f52c2"
-secret <- "73568369dc3d4c57958979c83a9815ad"
-Sys.setenv(SPOTIFY_CLIENT_ID = id)
-Sys.setenv(SPOTIFY_CLIENT_SECRET = secret)
-access_token <- get_spotify_access_token()
-my_id <- "crwmusic"
