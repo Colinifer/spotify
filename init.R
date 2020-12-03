@@ -15,7 +15,8 @@ pkgs <-
     "genius",
     "httpuv",
     "spotifyr",
-    "reactable"
+    "reactable",
+    "initR"
   )
 installed_packages <- pkgs %in%
   rownames(installed.packages())
@@ -29,3 +30,4 @@ fx.setdir(proj_name)
 
 # Spotify API setup ---------------------------------------------------------
 
+source('../initR/spotify/keys.R')
